@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 
+from store.managers import ProductReviewManager
 
 Customer = get_user_model()
 
@@ -28,6 +29,7 @@ class ProductsSubcategory(models.Model):
     title = models.CharField(max_length=30)
     slug = models.SlugField(max_length=30)
 
+    # relations
     category = models.ForeignKey(ProductsCategory, on_delete=models.CASCADE)
 
     class Meta:
@@ -44,10 +46,14 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
 
+    # calculated fields
+    likes_count = models.IntegerField(default=0)
+    rating = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
+
+    # relations
     category = models.ForeignKey(ProductsSubcategory,
                                  on_delete=models.CASCADE,
                                  related_name='products')
-    rating = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
     customers_who_liked_this = models.ManyToManyField(Customer, related_name='liked_products', blank=True)
 
     def __str__(self):
@@ -58,6 +64,7 @@ class ProductPhoto(models.Model):
     name = models.CharField(max_length=30)
     photo = models.ImageField(upload_to='images/products_photo/')
 
+    # relations
     product = models.ForeignKey(Product,
                                 on_delete=models.CASCADE,
                                 related_name='photos')
@@ -66,24 +73,7 @@ class ProductPhoto(models.Model):
         return f'{self.name}'
 
 
-class Cart(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-
-    product = models.ManyToManyField(Product)
-    cost = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        return f'Cart#{self.id}:{self.customer.username}'
-
-
 class ProductReview(models.Model):
-    product = models.ForeignKey(Product,
-                                on_delete=models.CASCADE,
-                                related_name='reviews')
-    customer = models.ForeignKey(Customer,
-                                 on_delete=models.CASCADE,
-                                 related_name='reviews')
-
     benefits = models.TextField(max_length=500)
     issues = models.TextField(max_length=500)
     comment = models.TextField(max_length=1000)
@@ -93,21 +83,29 @@ class ProductReview(models.Model):
 
     mark = models.IntegerField(choices=MARK_CHOICES)
 
-    @classmethod
-    def create(cls, *args, **kwargs):
-        review = cls(*args, **kwargs)
-        review.save()
-        print(
-            'save'
-        )
-        from store.services import calculate_product_rating
+    # relations
+    product = models.ForeignKey(Product,
+                                on_delete=models.CASCADE,
+                                related_name='reviews')
+    customer = models.ForeignKey(Customer,
+                                 on_delete=models.CASCADE,
+                                 related_name='reviews')
 
-        calculate_product_rating(review)
-
-        return review
+    objects = ProductReviewManager()
 
     def __str__(self):
         return f'{self.product.slug}:{self.id}'
+
+
+class Cart(models.Model):
+    product = models.ManyToManyField(Product)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # relations
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Cart#{self.id}:{self.customer.username}'
 
 
 class Affiliate(models.Model):
@@ -115,11 +113,12 @@ class Affiliate(models.Model):
 
 
 class AffiliateProductTable(models.Model):
-    products = models.ForeignKey(Product, on_delete=models.CASCADE)
-    affiliate = models.ForeignKey(Affiliate, on_delete=models.CASCADE)
-
     product_count = models.IntegerField()
     reserved_product_count = models.IntegerField()
+
+    # relations
+    products = models.ForeignKey(Product, on_delete=models.CASCADE)
+    affiliate = models.ForeignKey(Affiliate, on_delete=models.CASCADE)
 
 
 class Order(models.Model):
@@ -127,8 +126,8 @@ class Order(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    # relations
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    # shipping_address = models.ForeignKey(CustomerHome, on_delete=models.SET_NULL)
     products = models.ManyToManyField(Product)
 
     class ORDER_STATUS(models.TextChoices):

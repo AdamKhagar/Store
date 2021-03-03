@@ -2,10 +2,8 @@ from django.contrib.auth import get_user_model
 from factory import SubFactory, Sequence, PostGenerationMethodCall
 from factory.django import DjangoModelFactory
 
-from store.models import Customer
 
-
-class UserFactory(DjangoModelFactory):
+class CustomerFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
         django_get_or_create = ('username',)
@@ -17,8 +15,3 @@ class UserFactory(DjangoModelFactory):
     password = PostGenerationMethodCall('set_password', 'qwerty123')
 
 
-class CustomerFactory(DjangoModelFactory):
-    class Meta:
-        model = Customer
-
-    user = SubFactory(UserFactory)

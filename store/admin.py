@@ -11,6 +11,7 @@ from store.models import (Customer,
                           ProductsCategory,
                           ProductsSubcategory,
                           ProductReview)
+from store.services import calculate_product_rating
 
 admin.site.register(ProductPhoto)
 admin.site.register(Cart)
@@ -65,3 +66,7 @@ class ProductReviewAdmin(ModelAdmin):
         return f'Review#{obj.id}'
 
     review_id.admin_order_field = 'review_id'
+
+    def save_model(self, request, obj, form, change):
+        calculate_product_rating(obj)
+        super().save_model(request, obj, form, change)
