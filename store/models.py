@@ -41,13 +41,12 @@ class ProductsSubcategory(models.Model):
 
 
 class Product(models.Model):
-    title = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100)
+    title = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
 
     # calculated fields
-    likes_count = models.IntegerField(default=0)
     rating = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
 
     # relations
@@ -98,14 +97,19 @@ class ProductReview(models.Model):
 
 
 class Cart(models.Model):
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    # relations
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product)
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Cart#{self.id}:{self.customer.username}'
+
+
+class ProductCartRelation(models.Model):
+    count = models.IntegerField(default=1)
+    product = models.ForeignKey(Product,
+                                on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart,
+                             related_name='products',
+                             on_delete=models.CASCADE)
 
 
 class Affiliate(models.Model):
