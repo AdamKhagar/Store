@@ -1,17 +1,25 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from store.models import Product, Cart
+from store.models import Product, Cart, ProductsCategory, ProductsSubcategory, ProductPhoto
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    photos = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='store:product_photos-detail'
+    )
+
     class Meta:
         model = Product
         fields = [
+            'id',
             'title',
             'slug',
             'description',
             'price',
+            'photos',
 
             'rating',
             'category'
@@ -58,3 +66,47 @@ class CartSetProductCountSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['product', 'count']
 
+
+class ProductsCategorySerializer(serializers.ModelSerializer):
+    subcategories = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='store:subcategories-detail'
+    )
+
+    class Meta:
+        model = ProductsCategory
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'subcategories'
+        ]
+
+
+class ProductsSubcategorySerializer(serializers.ModelSerializer):
+    category = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='store:categories-detail'
+    )
+    products = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='store:products-detail'
+    )
+
+    class Meta:
+        model = ProductsSubcategory
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'category',
+            'products'
+        ]
+
+
+class ProductPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductPhoto
+        fields = '__all__'

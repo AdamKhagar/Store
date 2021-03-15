@@ -30,7 +30,9 @@ class ProductsSubcategory(models.Model):
     slug = models.SlugField(max_length=30)
 
     # relations
-    category = models.ForeignKey(ProductsCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(ProductsCategory,
+                                 related_name='subcategories',
+                                 on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Products subcategory'
@@ -61,7 +63,7 @@ class Product(models.Model):
 
 class ProductPhoto(models.Model):
     name = models.CharField(max_length=30)
-    photo = models.ImageField(upload_to='images/products_photo/')
+    photo = models.ImageField(upload_to='images')
 
     # relations
     product = models.ForeignKey(Product,
@@ -110,19 +112,6 @@ class ProductCartRelation(models.Model):
     cart = models.ForeignKey(Cart,
                              related_name='products',
                              on_delete=models.CASCADE)
-
-
-class Affiliate(models.Model):
-    address = models.CharField(max_length=100)
-
-
-class AffiliateProductTable(models.Model):
-    product_count = models.IntegerField()
-    reserved_product_count = models.IntegerField()
-
-    # relations
-    products = models.ForeignKey(Product, on_delete=models.CASCADE)
-    affiliate = models.ForeignKey(Affiliate, on_delete=models.CASCADE)
 
 
 class Order(models.Model):

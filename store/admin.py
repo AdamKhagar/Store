@@ -6,7 +6,6 @@ from store.models import (Customer,
                           Product,
                           ProductPhoto,
                           Cart,
-                          Affiliate,
                           Order,
                           ProductsCategory,
                           ProductsSubcategory,
@@ -15,7 +14,6 @@ from store.services import calculate_product_rating
 
 admin.site.register(ProductPhoto)
 admin.site.register(Cart)
-admin.site.register(Affiliate)
 admin.site.register(Order)
 admin.site.register(ProductsCategory)
 

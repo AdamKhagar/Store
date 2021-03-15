@@ -1,4 +1,4 @@
-from django.urls import path
+
 from rest_framework.routers import SimpleRouter
 
 from store import views
@@ -7,9 +7,9 @@ router = SimpleRouter(trailing_slash=False)
 
 router.register('products', views.ProductView, basename='products')
 router.register('cart', views.CartView, basename='cart')
+router.register('categories', views.ProductsCategoryView, basename='categories')
+router.register('subcategories', views.ProductsSubcategoryView, basename='subcategories')
+router.register('product-photo', views.ProductPhotoView, basename='product_photos')
 urlpatterns = router.urls
 
-urlpatterns += [
-    # path('cart/add', views.CartAddProductView.as_view(), name='cart_add'),
-    # path('cart', views.CartView.as_view(), name='cart'),
-]
+urlpatterns += []
